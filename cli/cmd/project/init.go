@@ -221,6 +221,12 @@ func deploy(
 		return fmt.Errorf("failed to create postgres migration: %w", err)
 	}
 
+	// Hasura derives this migration from pg_dump output, which can include
+	// psql-only commands that the migration engine cannot execute.
+	if err := cleanInitialMigration(ce.Path.NhostFolder()); err != nil {
+		return fmt.Errorf("failed to clean init migration: %w", err)
+	}
+
 	ce.Infoln("Downloading metadata...")
 
 	if err := docker.HasuraWrapper(
